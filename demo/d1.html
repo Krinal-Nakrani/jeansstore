@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DENIM — AI Product Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #f2ede6;
+    --denim: #2c4a7c;
+    --denim-light: #4a72b8;
+    --rust: #c4622d;
+    --cream: #e8e0d0;
+    --gold: #b8962e;
+    --fog: #8a8478;
+    --white: #faf8f4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ink);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  .site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.15em;
+    color: var(--white);
+  }
+
+  .logo span { color: var(--denim-light); }
+
+  .nav-tags {
+    display: flex;
+    gap: 32px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fog);
+  }
+
+  .nav-tags a { color: inherit; text-decoration: none; transition: color 0.2s; cursor: pointer; }
+  .nav-tags a:hover { color: var(--white); }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .cart-btn {
+    background: var(--denim);
+    color: var(--white);
+    border: none;
+    padding: 10px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .cart-btn:hover { background: var(--denim-light); }
+
+  /* PAGE INTRO */
+  .page-intro {
+    padding: 64px 48px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 10vw, 120px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--white);
+  }
+
+  .page-title em {
+    display: block;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.42em;
+    color: var(--fog);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  .ai-badge-banner {
+    background: rgba(44,74,124,0.2);
+    border: 1px solid rgba(74,114,184,0.3);
+    padding: 16px 24px;
+    max-width: 280px;
+    text-align: right;
+  }
+
+  .ai-badge-banner .label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--denim-light);
+    margin-bottom: 6px;
+  }
+
+  .ai-badge-banner p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: var(--cream);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* FILTERS BAR */
+  .filters-bar {
+    padding: 0 48px 32px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 7px 16px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--fog);
+  }
+  .filter-chip:hover, .filter-chip.active {
+    border-color: var(--denim-light);
+    color: var(--denim-light);
+    background: rgba(74,114,184,0.1);
+  }
+
+  .filter-sep { color: rgba(255,255,255,0.1); font-size: 18px; }
+
+  .ai-sort {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--fog);
+  }
+
+  .ai-sort-toggle {
+    width: 36px; height: 18px;
+    background: var(--denim);
+    border-radius: 9px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .ai-sort-toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 12px; height: 12px;
+    background: var(--white);
+    border-radius: 50%;
+    transition: right 0.3s;
+  }
+
+  /* PRODUCTS GRID */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2px;
+    padding: 0 48px 80px;
+  }
+
+  /* PRODUCT CARD */
+  .product-card {
+    position: relative;
+    background: #111;
+    cursor: pointer;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+  }
+
+  /* Image layer */
+  .card-media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s;
+  }
+
+  /* VIDEO SIMULATION - CSS animation mimicking video on hover */
+  .card-video-sim {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    overflow: hidden;
+  }
+
+  .card-video-sim .video-frame {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* Animate multiple "frames" via keyframes to simulate video */
+  @keyframes videoSim1 {
+    0%, 24%   { background-position: center top; transform: scale(1.08); }
+    25%, 49%  { background-position: center 30%; transform: scale(1.05); }
+    50%, 74%  { background-position: center 60%; transform: scale(1.1); }
+    75%, 100% { background-position: center bottom; transform: scale(1.07); }
+  }
+  @keyframes videoSim2 {
+    0%, 33%   { background-position: 40% center; transform: scale(1.06) translateX(-3px); }
+    34%, 66%  { background-position: 60% center; transform: scale(1.08) translateX(3px); }
+    67%, 100% { background-position: center center; transform: scale(1.05) translateX(0); }
+  }
+  @keyframes videoSim3 {
+    0%   { clip-path: inset(0 0 80% 0); }
+    100% { clip-path: inset(0 0 0% 0); }
+  }
+
+  .product-card:hover .card-video-sim {
+    opacity: 1;
+  }
+
+  .product-card:hover .card-video-sim .video-frame {
+    animation: videoSim1 3s ease-in-out infinite;
+  }
+
+  .product-card:hover .card-img {
+    transform: scale(1.04);
+    opacity: 0.15;
+  }
+
+  /* Gradient overlay */
+  .card-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,0) 40%,
+      rgba(0,0,0,0.7) 75%,
+      rgba(0,0,0,0.95) 100%
+    );
+    z-index: 2;
+  }
+
+  /* Top badges */
+  .card-badges {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 10;
+  }
+
+  .badge {
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .badge-new { background: var(--rust); color: var(--white); }
+  .badge-trending {
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    backdrop-filter: blur(4px);
+  }
+  .badge-ai {
+    background: rgba(44,74,124,0.85);
+    border: 1px solid var(--denim-light);
+    color: var(--denim-light);
+    backdrop-filter: blur(4px);
+  }
+  .badge-sold {
+    background: rgba(180,40,40,0.8);
+    color: var(--white);
+  }
+
+  /* Quick actions - appear on hover */
+  .card-quick-actions {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+    opacity: 0;
+    transform: translateX(12px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .product-card:hover .card-quick-actions {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .quick-btn {
+    width: 36px; height: 36px;
+    background: rgba(10,10,10,0.85);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+  }
+  .quick-btn:hover { background: var(--denim); border-color: var(--denim-light); }
+
+  /* Video indicator */
+  .video-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .product-card:hover .video-indicator {
+    opacity: 1;
+    animation: fadeOut 0.8s ease 1s forwards;
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; }
+  }
+
+  .play-ring {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+    animation: pulseRing 0.6s ease;
+  }
+
+  @keyframes pulseRing {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Progress bar simulating video scrub */
+  .video-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .video-progress-bar {
+    height: 100%;
+    background: var(--denim-light);
+    width: 0%;
+  }
+
+  .product-card:hover .video-progress {
+    opacity: 1;
+  }
+
+  .product-card:hover .video-progress-bar {
+    animation: videoProgress 3s linear infinite;
+  }
+
+  @keyframes videoProgress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+
+  /* Card info bottom */
+  .card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px 18px;
+    z-index: 5;
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .card-meta {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fog);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .social-proof {
+    color: var(--denim-light);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .live-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #4caf50;
+    animation: blink 1.5s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--white);
+    margin-bottom: 4px;
+    letter-spacing: 0.01em;
+  }
+
+  .card-fit-tag {
+    font-size: 9px;
+    color: var(--fog);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* Size selector - appears on hover */
+  .size-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.35s ease 0.1s;
+  }
+
+  .product-card:hover .size-selector {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .size-btn {
+    width: 30px; height: 26px;
+    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--fog);
+    font-family: 'DM Mono', monospace;
+  }
+  .size-btn:hover { border-color: var(--white); color: var(--white); }
+  .size-btn.active { background: var(--white); color: var(--ink); border-color: var(--white); }
+  .size-btn.low { border-color: rgba(196,98,45,0.5); color: var(--rust); }
+
+  /* Price & CTA row */
+  .card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .price-block .price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    color: var(--white);
+  }
+
+  .price-block .price-original {
+    font-size: 11px;
+    color: var(--fog);
+    text-decoration: line-through;
+    margin-left: 6px;
+  }
+
+  .price-block .discount-tag {
+    font-size: 9px;
+    color: var(--rust);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-top: 1px;
+  }
+
+  .add-to-cart-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    padding: 10px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.3s ease 0.15s;
+  }
+
+  .product-card:hover .add-to-cart-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .add-to-cart-btn:hover {
+    background: var(--white);
+    color: var(--ink);
+    border-color: var(--white);
+  }
+
+  /* AI Styling Suggestion - pops up on hover */
+  .ai-style-tip {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: -80px;
+    background: rgba(44,74,124,0.9);
+    border: 1px solid rgba(74,114,184,0.4);
+    backdrop-filter: blur(10px);
+    padding: 12px 14px;
+    z-index: 6;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+  }
+
+  .product-card:hover .ai-style-tip {
+    transform: translateY(-98px);
+  }
+
+  .ai-style-tip .tip-label {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--denim-light);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ai-style-tip .tip-label::before {
+    content: '✦';
+    font-size: 8px;
+  }
+
+  .ai-style-tip p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--cream);
+    line-height: 1.4;
+    font-weight: 300;
+  }
+
+  /* FEATURED CARD (spans 2 cols) */
+  .product-card.featured {
+    grid-column: span 2;
+    aspect-ratio: 16/9;
+  }
+
+  .product-card.featured .card-name {
+    font-size: 32px;
+  }
+
+  .product-card.featured .card-info {
+    max-width: 400px;
+  }
+
+  /* COLOR SWATCHES */
+  .color-dots {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease 0.05s;
+  }
+
+  .product-card:hover .color-dots {
+    opacity: 1;
+  }
+
+  .color-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: transform 0.15s;
+  }
+  .color-dot:hover { transform: scale(1.3); border-color: var(--white); }
+  .color-dot.active { border-color: var(--white); }
+
+  /* STATS ROW */
+  .stats-row {
+    padding: 32px 48px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 2px;
+  }
+
+  .stat-block {
+    background: #111;
+    padding: 24px 28px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    color: var(--white);
+    letter-spacing: 0.04em;
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fog);
+    margin-top: 4px;
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--white);
+    color: var(--ink);
+    padding: 16px 24px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    z-index: 200;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .toast-icon { font-size: 16px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--denim); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .site-header { padding: 20px 20px; }
+    .nav-tags { display: none; }
+    .page-intro { padding: 40px 20px 24px; flex-direction: column; gap: 24px; }
+    .ai-badge-banner { text-align: left; max-width: 100%; }
+    .filters-bar { padding: 0 20px 24px; }
+    .products-grid { padding: 0 20px 60px; gap: 2px; grid-template-columns: repeat(2, 1fr); }
+    .stats-row { padding: 20px 20px; grid-template-columns: repeat(2, 1fr); }
+    .product-card.featured { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo">RAWDENIM<span>.</span></div>
+  <nav class="nav-tags">
+    <a href="#">New Drops</a>
+    <a href="#">Slim Fit</a>
+    <a href="#">Relaxed</a>
+    <a href="#">Wide Leg</a>
+    <a href="#">Heritage</a>
+  </nav>
+  <div class="header-actions">
+    <span style="font-size:10px;color:var(--fog);letter-spacing:0.1em;">AI MATCH ON</span>
+    <button class="cart-btn">Cart (0)</button>
+  </div>
+</header>
+
+<!-- PAGE INTRO -->
+<div class="page-intro">
+  <div class="page-title">
+    DENIM
+    <em>Crafted for the relentless</em>
+  </div>
+  <div class="ai-badge-banner">
+    <div class="label">✦ AI Styling Active</div>
+    <p>Hover any card to see your AI style match and outfit suggestions in real time.</p>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <div class="filter-chip active">All Fits</div>
+  <div class="filter-chip">Slim</div>
+  <div class="filter-chip">Straight</div>
+  <div class="filter-chip">Relaxed</div>
+  <div class="filter-chip">Wide Leg</div>
+  <div class="filter-sep">|</div>
+  <div class="filter-chip">Under ₹1500</div>
+  <div class="filter-chip">New Arrivals</div>
+  <div class="ai-sort">
+    <div class="ai-sort-toggle"></div>
+    <span>AI Rank by Your Style</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-block">
+    <span class="stat-num">847</span>
+    <div class="stat-label">Orders Today</div>
+  </div>
+  <div class="stat-block">
+    <span class="stat-num">4.8★</span>
+    <div class="stat-label">Avg Rating</div>
+  </div>
+  <div class="stat-block">
+    <span class="stat-num">32</span>
+    <div class="stat-label">Styles Live</div>
+  </div>
+  <div class="stat-block">
+    <span class="stat-num">2hr</span>
+    <div class="stat-label">Dispatch Cutoff</div>
+  </div>
+</div>
+
+<!-- PRODUCTS GRID -->
+<div class="products-grid" id="productsGrid">
+
+  <!-- CARD 1 - Featured -->
+  <div class="product-card featured" onclick="addToCart('Shadow Slim 002')">
+    <div class="card-media">
+      <img class="card-img" src="https://images.unsplash.com/photo-1542272604-787c3835535d?w=900&q=80" alt="Shadow Slim Jeans">
+      <div class="card-video-sim">
+        <div class="video-frame" style="background-image: url('https://images.unsplash.com/photo-1542272604-787c3835535d?w=900&q=80'); background-size: cover;"></div>
+      </div>
+    </div>
+    <div class="card-gradient"></div>
+    <div class="video-indicator"><div class="play-ring">▶</div></div>
+    <div class="video-progress"><div class="video-progress-bar"></div></div>
+
+    <div class="card-badges">
+      <div>
+        <div class="badge badge-new">New Drop</div>
+      </div>
+    </div>
+
+    <div class="card-quick-actions">
+      <div class="quick-btn" onclick="event.stopPropagation()" title="Wishlist">♡</div>
+      <div class="quick-btn" onclick="event.stopPropagation()" title="Quick view">⊕</div>
+      <div class="quick-btn" onclick="event.stopPropagation()" title="AI Style Match">✦</div>
+    </div>
+
+    <div class="card-info">
+      <div class="card-meta">
+        <span>SKU-SD002</span>
+        <span class="social-proof"><span class="live-dot"></span>23 viewing now</span>
+      </div>
+      <div class="card-name">Shadow Slim 002</div>
+      <div class="card-fit-tag">Slim Fit · Mid Rise · Stretch Denim</div>
+
+      <div class="color-dots">
+        <div class="color-dot active" style="background:#1a1a2e;" title="Midnight"></div>
+        <div class="color-dot" style="background:#2c4a7c;" title="Indigo"></div>
+        <div class="color-dot" style="background:#4a3728;" title="Brown"></div>
+        <div class="color-dot" style="background:#888;" title="Light Wash"></div>
+      </div>
+
+      <div class="size-selector">
+        <div class="size-btn">28</div>
+        <div class="size-btn">30</div>
+        <div class="size-btn active">32</div>
+        <div class="size-btn">34</div>
+        <div class="size-btn low">36</div>
+      </div>
+
+      <div class="card-bottom">
+        <div class="price-block">
+          <span class="price">₹1,299 <span class="price-original">₹1,899</span></span>
+          <span class="discount-tag">31% OFF · Limited Stock</span>
+        </div>
+        <button class="add-to-cart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <div class="ai-style-tip">
+      <div class="tip-label">AI Style Match</div>
+      <p>Pairs perfectly with an oversized white Oxford or a fitted black turtleneck. Street-ready or office-ready.</p>
+    </div>
+  </div>
+
+  <!-- CARD 2 -->
+  <div class="product-card" onclick="addToCart('Indigo Raw 001')">
+    <div class="card-media">
+      <img class="card-img" src="https://images.unsplash.com/photo-1475178626620-a4d074967452?w=600&q=80" alt="Indigo Raw Jeans">
+      <div class="card-video-sim">
+        <div class="video-frame" style="background-image: url('https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80'); background-size: cover; animation-name: videoSim2;"></div>
+      </div>
+    </div>
+    <div class="card-gradient"></div>
+    <div class="video-indicator"><div class="play-ring">▶</div></div>
+    <div class="video-progress"><div class="video-progress-bar"></div></div>
+
+    <div class="card-badges">
+      <div class="badge badge-ai">✦ AI Pick</div>
+    </div>
+
+    <div class="card-quick-actions">
+      <div class="quick-btn" title="Wishlist">♡</div>
+      <div class="quick-btn" title="Quick view">⊕</div>
+    </div>
+
+    <div class="card-info">
+      <div class="card-meta">
+        <span>SKU-IR001</span>
+        <span class="social-proof"><span class="live-dot"></span>11 viewing</span>
+      </div>
+      <div class="card-name">Indigo Raw 001</div>
+      <div class="card-fit-tag">Straight Fit · High Rise · Raw Selvedge</div>
+
+      <div class="color-dots">
+        <div class="color-dot active" style="background:#2c4a7c;"></div>
+        <div class="color-dot" style="background:#1a1a2e;"></div>
+      </div>
+
+      <div class="size-selector">
+        <div class="size-btn">28</div>
+        <div class="size-btn active">30</div>
+        <div class="size-btn">32</div>
+        <div class="size-btn low">34</div>
+      </div>
+
+      <div class="card-bottom">
+        <div class="price-block">
+          <span class="price">₹1,599</span>
+          <span class="discount-tag">Free Shipping</span>
+        </div>
+        <button class="add-to-cart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <div class="ai-style-tip">
+      <div class="tip-label">AI Style Match</div>
+      <p>Best with a tucked chambray shirt and white sneakers — your laid-back power look.</p>
+    </div>
+  </div>
+
+  <!-- CARD 3 -->
+  <div class="product-card" onclick="addToCart('Dust Wash Wide')">
+    <div class="card-media">
+      <img class="card-img" src="https://images.unsplash.com/photo-1582552938357-32b906df40cb?w=600&q=80" alt="Dust Wash Wide Leg">
+      <div class="card-video-sim">
+        <div class="video-frame" style="background-image: url('https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80'); background-size: cover;"></div>
+      </div>
+    </div>
+    <div class="card-gradient"></div>
+    <div class="video-indicator"><div class="play-ring">▶</div></div>
+    <div class="video-progress"><div class="video-progress-bar"></div></div>
+
+    <div class="card-badges">
+      <div class="badge badge-trending">🔥 Trending</div>
+    </div>
+
+    <div class="card-quick-actions">
+      <div class="quick-btn" title="Wishlist">♡</div>
+      <div class="quick-btn" title="Quick view">⊕</div>
+      <div class="quick-btn" title="AI Style">✦</div>
+    </div>
+
+    <div class="card-info">
+      <div class="card-meta">
+        <span>SKU-DW003</span>
+        <span class="social-proof"><span class="live-dot"></span>47 viewing</span>
+      </div>
+      <div class="card-name">Dust Wash Wide</div>
+      <div class="card-fit-tag">Wide Leg · Low Rise · Acid Wash</div>
+
+      <div class="color-dots">
+        <div class="color-dot active" style="background:#a8b8c8;"></div>
+        <div class="color-dot" style="background:#d4c9b8;"></div>
+        <div class="color-dot" style="background:#8a7868;"></div>
+      </div>
+
+      <div class="size-selector">
+        <div class="size-btn">26</div>
+        <div class="size-btn">28</div>
+        <div class="size-btn active">30</div>
+        <div class="size-btn low">32</div>
+      </div>
+
+      <div class="card-bottom">
+        <div class="price-block">
+          <span class="price">₹1,149 <span class="price-original">₹1,599</span></span>
+          <span class="discount-tag">28% OFF</span>
+        </div>
+        <button class="add-to-cart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <div class="ai-style-tip">
+      <div class="tip-label">AI Style Match</div>
+      <p>Crop it with a ribbed tank or go oversized hoodie — both create that effortless wide-leg moment.</p>
+    </div>
+  </div>
+
+  <!-- CARD 4 -->
+  <div class="product-card" onclick="addToCart('Coal Tapered 005')">
+    <div class="card-media">
+      <img class="card-img" src="https://images.unsplash.com/photo-1594938298603-c8148c4b4a41?w=600&q=80" alt="Coal Tapered">
+      <div class="card-video-sim">
+        <div class="video-frame" style="background-image: url('https://images.unsplash.com/photo-1544441893-675973e31985?w=600&q=80'); background-size: cover; animation-name: videoSim2;"></div>
+      </div>
+    </div>
+    <div class="card-gradient"></div>
+    <div class="video-indicator"><div class="play-ring">▶</div></div>
+    <div class="video-progress"><div class="video-progress-bar"></div></div>
+
+    <div class="card-badges">
+      <div class="badge badge-new">Just In</div>
+    </div>
+
+    <div class="card-quick-actions">
+      <div class="quick-btn" title="Wishlist">♡</div>
+      <div class="quick-btn" title="Quick view">⊕</div>
+    </div>
+
+    <div class="card-info">
+      <div class="card-meta">
+        <span>SKU-CT005</span>
+        <span class="social-proof"><span class="live-dot"></span>8 viewing</span>
+      </div>
+      <div class="card-name">Coal Tapered 005</div>
+      <div class="card-fit-tag">Tapered · Mid Rise · Black Stretch</div>
+
+      <div class="color-dots">
+        <div class="color-dot active" style="background:#111;"></div>
+        <div class="color-dot" style="background:#2a2a2a;"></div>
+        <div class="color-dot" style="background:#1a1a2e;"></div>
+      </div>
+
+      <div class="size-selector">
+        <div class="size-btn">30</div>
+        <div class="size-btn active">32</div>
+        <div class="size-btn">34</div>
+        <div class="size-btn">36</div>
+      </div>
+
+      <div class="card-bottom">
+        <div class="price-block">
+          <span class="price">₹1,449</span>
+          <span class="discount-tag">New Season</span>
+        </div>
+        <button class="add-to-cart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <div class="ai-style-tip">
+      <div class="tip-label">AI Style Match</div>
+      <p>All-black with chunky boots is the move. Or contrast with a cream knit for a smart-casual edge.</p>
+    </div>
+  </div>
+
+  <!-- CARD 5 -->
+  <div class="product-card" onclick="addToCart('Heritage Straight 009')">
+    <div class="card-media">
+      <img class="card-img" src="https://images.unsplash.com/photo-1604176354204-9268737828e4?w=600&q=80" alt="Heritage Straight">
+      <div class="card-video-sim">
+        <div class="video-frame" style="background-image: url('https://images.unsplash.com/photo-1520013573073-cc0dba20c0f2?w=600&q=80'); background-size: cover;"></div>
+      </div>
+    </div>
+    <div class="card-gradient"></div>
+    <div class="video-indicator"><div class="play-ring">▶</div></div>
+    <div class="video-progress"><div class="video-progress-bar"></div></div>
+
+    <div class="card-badges">
+      <div class="badge badge-ai">✦ Bestseller</div>
+    </div>
+
+    <div class="card-quick-actions">
+      <div class="quick-btn" title="Wishlist">♡</div>
+      <div class="quick-btn" title="AI Style">✦</div>
+    </div>
+
+    <div class="card-info">
+      <div class="card-meta">
+        <span>SKU-HS009</span>
+        <span class="social-proof"><span class="live-dot"></span>62 viewing</span>
+      </div>
+      <div class="card-name">Heritage Straight 009</div>
+      <div class="card-fit-tag">Straight · High Rise · Classic Denim</div>
+
+      <div class="color-dots">
+        <div class="color-dot active" style="background:#3a5a8a;"></div>
+        <div class="color-dot" style="background:#1a1a2e;"></div>
+        <div class="color-dot" style="background:#7a6a58;"></div>
+        <div class="color-dot" style="background:#c0b8a8;"></div>
+      </div>
+
+      <div class="size-selector">
+        <div class="size-btn">28</div>
+        <div class="size-btn active">30</div>
+        <div class="size-btn">32</div>
+        <div class="size-btn">34</div>
+        <div class="size-btn">36</div>
+      </div>
+
+      <div class="card-bottom">
+        <div class="price-block">
+          <span class="price">₹1,199 <span class="price-original">₹1,699</span></span>
+          <span class="discount-tag">29% OFF · 143 sold today</span>
+        </div>
+        <button class="add-to-cart-btn">Add to Cart</button>
+      </div>
+    </div>
+
+    <div class="ai-style-tip">
+      <div class="tip-label">AI Style Match</div>
+      <p>The jeans that go with everything. Tuck in a denim jacket over it — double denim done right.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toastText">Added to cart</span>
+</div>
+
+<script>
+  // Size selector interaction
+  document.querySelectorAll('.size-selector').forEach(selector => {
+    selector.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selector.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btn.style.transform = 'scale(1.15)';
+        setTimeout(() => btn.style.transform = '', 200);
+      });
+    });
+  });
+
+  // Color dot interaction
+  document.querySelectorAll('.color-dot').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const siblings = dot.parentElement.querySelectorAll('.color-dot');
+      siblings.forEach(d => d.classList.remove('active'));
+      dot.classList.add('active');
+    });
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+
+  // Add to cart
+  function addToCart(name) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = `"${name}" added to cart`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // Quick btns stop propagation
+  document.querySelectorAll('.quick-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.style.transform = 'scale(0.85)';
+      setTimeout(() => btn.style.transform = '', 150);
+    });
+  });
+
+  // Animate cards on page load
+  const cards = document.querySelectorAll('.product-card');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '0';
+        entry.target.style.transform = 'translateY(24px)';
+        entry.target.style.transition = `opacity 0.5s ease ${i * 0.08}s, transform 0.5s ease ${i * 0.08}s`;
+        requestAnimationFrame(() => {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach(card => observer.observe(card));
+
+  // Live viewer count pulse
+  setInterval(() => {
+    document.querySelectorAll('.social-proof').forEach(el => {
+      const numEl = el.querySelector('.live-dot');
+      if (numEl) {
+        const text = el.textContent;
+        const match = text.match(/(\d+)/);
+        if (match) {
+          const num = parseInt(match[1]);
+          const delta = Math.floor(Math.random() * 3) - 1;
+          const newNum = Math.max(1, num + delta);
+          el.innerHTML = `<span class="live-dot"></span>${newNum} viewing${newNum > 1 ? '' : ' now'}`;
+        }
+      }
+    });
+  }, 4000);
+
+  // Stats counter animation
+  document.querySelectorAll('.stat-num').forEach(el => {
+    const target = el.textContent;
+    const numMatch = target.match(/(\d+)/);
+    if (numMatch) {
+      const end = parseInt(numMatch[1]);
+      const prefix = target.replace(/[\d,]+/, '').trim();
+      let current = 0;
+      const step = end / 40;
+      const timer = setInterval(() => {
+        current = Math.min(current + step, end);
+        el.textContent = target.includes('★')
+          ? current.toFixed(1) + '★'
+          : Math.round(current).toLocaleString() + (prefix && !target.includes('★') ? prefix : '');
+        if (current >= end) clearInterval(timer);
+      }, 25);
+    }
+  });
+</script>
+
+</body>
+</html>
