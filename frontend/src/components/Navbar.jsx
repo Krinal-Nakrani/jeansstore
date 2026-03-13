@@ -314,7 +314,7 @@ export default function Navbar() {
 //       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
 //         {/* Logo */}
 //         <Link to="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 28, letterSpacing: 4, color: '#c8a96e' }}>
-//           DENIM<span style={{ color: '#fff' }}>CO</span>
+//           INDUS<span style={{ color: '#fff' }}>.</span>
 //         </Link>
 
 //         {/* Nav Links */}

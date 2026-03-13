@@ -30,7 +30,7 @@ export function Login() {
   return (
     <AuthShell
       title="Welcome Back"
-      subtitle="Sign in to your DENIMCO account"
+      subtitle="Sign in to your INDUS. account"
       error={error}
       loading={loading}
       onSubmit={handleSubmit}
@@ -105,7 +105,7 @@ export function Register() {
   return (
     <AuthShell
       title="Create Account"
-      subtitle="Join DENIMCO — premium denim awaits"
+      subtitle="Join INDUS. — premium INDUS. awaits"
       error={error}
       loading={loading}
       onSubmit={handleSubmit}
@@ -376,8 +376,8 @@ function AuthShell({ title, subtitle, children, error, loading, onSubmit, submit
         <div className="auth-left">
           <div className="auth-left-texture" />
           <div className="auth-left-content">
-            <Link to="/" className="auth-left-logo">DENIM<span>CO</span></Link>
-            <div className="auth-tagline">Premium Denim<br />Crafted for You</div>
+            <Link to="/" className="auth-left-logo">INDUS<span>.</span></Link>
+            <div className="auth-tagline">Premium INDUS<br />Crafted for You</div>
             <p className="auth-tagline-sub">
               Discover handcrafted jeans built for the bold. Every pair tells a story.
             </p>
@@ -386,7 +386,7 @@ function AuthShell({ title, subtitle, children, error, loading, onSubmit, submit
                 ['🚚', 'Free shipping on orders above ₹999'],
                 ['↩️', '7-day hassle-free returns'],
                 ['🔒', 'Secure payments — Stripe & COD'],
-                ['⭐', 'Premium quality stretch denim'],
+                ['⭐', 'Premium quality stretch INDUS'],
               ].map(([icon, text]) => (
                 <div className="auth-perk" key={text}>
                   <div className="auth-perk-icon">{icon}</div>
@@ -402,7 +402,7 @@ function AuthShell({ title, subtitle, children, error, loading, onSubmit, submit
           <div className="auth-right-inner">
 
             {/* Mobile logo */}
-            <Link to="/" className="auth-mobile-logo">DENIM<span>CO</span></Link>
+            <Link to="/" className="auth-mobile-logo">INDUS<span>.</span></Link>
 
             <h2 className="auth-form-title">{title}</h2>
             <p className="auth-form-sub">{subtitle}</p>
@@ -554,7 +554,7 @@ function getPasswordStrength(pwd) {
 //     <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0a0a' }}>
 //       <div style={{ width: '100%', maxWidth: 420, padding: '0 20px' }}>
 //         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-//           <Link to="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 32, letterSpacing: 4, color: '#c8a96e' }}>DENIM<span style={{ color: '#fff' }}>CO</span></Link>
+//           <Link to="/" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 32, letterSpacing: 4, color: '#c8a96e' }}>INDUS<span style={{ color: '#fff' }}>CO</span></Link>
 //           <h2 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 36, letterSpacing: 2, marginTop: 24 }}>{title}</h2>
 //           <p style={{ color: '#555', fontSize: 14, marginTop: 6 }}>{subtitle}</p>
 //         </div>
