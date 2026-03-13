@@ -33,7 +33,7 @@ const bannerSlides = [
   {
     tag: 'EXCLUSIVE DROP',
     heading: ['STREET READY', 'BOLD & RAW'],
-    sub: 'New streetwear-inspired denim. Only at DENIMCO.',
+    sub: 'New streetwear-inspired denim. Only at INDUS.',
     cta: 'Explore Drop',
     bg: 'linear-gradient(135deg, #eef2f7 0%, #dde6f0 100%)',
     accent: '#1a1a1a',
@@ -374,7 +374,7 @@ export default function Home() {
           fontSize:'clamp(32px,6vw,72px)', letterSpacing:'3px', margin:'0 0 16px',
         }}>WEAR THE DIFFERENCE</h2>
         <p style={{ color:'#aaa', maxWidth:'500px', margin:'0 auto 32px', lineHeight:1.7, fontSize:'clamp(13px,1.4vw,15px)' }}>
-          Every pair is crafted with premium stretch denim, designed to move with you. From streets to boardrooms — DENIMCO fits every moment.
+          Every pair is crafted with premium stretch denim, designed to move with you. From streets to boardrooms — INDUS fits every moment.
         </p>
         <Link to="/shop" style={{
           background:'#fff', color:'#1a1a1a',
@@ -571,7 +571,7 @@ function ProductCard({ product, navigate }) {
 //             FIRST ORDER? GET 10% OFF
 //           </h2>
 //           <p style={{ color: '#3d2e10', marginBottom: 28, fontSize: 15 }}>
-//             Use code <strong>DENIMCO10</strong> at checkout
+//             Use code <strong>INDUS10</strong> at checkout
 //           </p>
 //           <Link to="/register" className="btn" style={{ background: '#e0f9c0', color: '#c8a96e', padding: '14px 40px', fontSize: 15, letterSpacing: 1 }}>
 //             Create Account →
@@ -581,8 +581,8 @@ function ProductCard({ product, navigate }) {
 
 //       {/* Footer */}
 //       <footer style={{ background: '#080808', borderTop: '1px solid #1a1a1a', padding: '40px 0', textAlign: 'center' }}>
-//         <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 24, letterSpacing: 4, color: '#c8a96e', marginBottom: 8 }}>DENIMCO</div>
-//         <div style={{ fontSize: 12, color: '#333' }}>© 2026 DenimCo. All rights reserved.</div>
+//         <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 24, letterSpacing: 4, color: '#c8a96e', marginBottom: 8 }}>INDUS</div>
+//         <div style={{ fontSize: 12, color: '#333' }}>© 2026 INDUS. All rights reserved.</div>
 //       </footer>
 //     </div>
 //   );

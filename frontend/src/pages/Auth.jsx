@@ -58,7 +58,7 @@ export function Register() {
     } finally { setLoading(false); }
   };
 
-  return <AuthPage title="Create Account" subtitle="Join DenimCo today" error={error} loading={loading} onSubmit={handleSubmit}
+  return <AuthPage title="Create Account" subtitle="Join INDUS today" error={error} loading={loading} onSubmit={handleSubmit}
     footer={<>Already have an account? <Link to="/login" style={{ color: '#c8a96e' }}>Login</Link></>}>
     <div className="form-group">
       <label>Full Name</label>

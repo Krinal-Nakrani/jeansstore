@@ -33,7 +33,7 @@ export default function AdminLayout({ children }) {
         <div style={{ padding: '20px 16px', borderBottom: '1px solid #1a1a2e', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg,#c8a96e,#a07840)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>👖</div>
           {!collapsed && <div>
-            <div style={{ fontWeight: 800, fontSize: 13, color: '#c8a96e', letterSpacing: 2 }}>DENIMCO</div>
+            <div style={{ fontWeight: 800, fontSize: 13, color: '#c8a96e', letterSpacing: 2 }}>INDUS</div>
             <div style={{ fontSize: 10, color: '#444', letterSpacing: 1 }}>ADMIN PANEL</div>
           </div>}
         </div>
