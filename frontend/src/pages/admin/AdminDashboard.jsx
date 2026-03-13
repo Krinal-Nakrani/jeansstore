@@ -6,57 +6,68 @@ import {
   LineChart, Line, CartesianGrid,
 } from 'recharts';
 
-/* ─────────────────────────────────────────
-   Design tokens  (shared across admin files)
-───────────────────────────────────────── */
+/* ── Light theme tokens (matches Cart/MyOrders/ProductDetail) ── */
 const T = {
-  black:   '#0a0a0a',
-  dark:    '#111111',
-  card:    '#161620',
-  card2:   '#1e1e2e',
-  border:  '#2a2a3e',
-  accent:  '#c8a96e',
-  accent2: '#e8c98e',
-  text:    '#f0f0f0',
-  text2:   '#aaaaaa',
-  muted:   '#55556a',
-  red:     '#e74c3c',
-  green:   '#27ae60',
-  blue:    '#3498db',
-  purple:  '#9b59b6',
-  orange:  '#f39c12',
+  bg:      '#faf7f2',
+  beige:   '#f0ebe1',
+  sand:    '#e2d9cc',
+  card:    '#ffffff',
+  border:  '#e0d8ce',
+  border2: '#d4ccc0',
+  ink:     '#1c1c1c',
+  ink2:    '#4a4a4a',
+  muted:   '#9a9080',
+  gold:    '#b89b6a',
+  gold2:   '#8a7048',
+  red:     '#c0392b',
+  redBg:   '#fef0ee',
+  redBdr:  '#f5c0bb',
+  green:   '#2d7a4f',
+  greenBg: '#edf7f2',
+  greenBdr:'#a8dfc0',
+  blue:    '#1a5fa8',
+  blueBg:  '#edf4fd',
+  blueBdr: '#b3d1f5',
+  purple:  '#6b3fa0',
+  purpleBg:'#f5f0fc',
+  purpleBdr:'#d5bcf5',
+  orange:  '#b07d0e',
+  orangeBg:'#fef9ec',
+  orangeBdr:'#f5e0a0',
 };
 
 const STATUS_CFG = {
-  pending:   { color: T.orange, bg: 'rgba(243,156,18,.12)',  border: 'rgba(243,156,18,.3)'  },
-  confirmed: { color: T.blue,   bg: 'rgba(52,152,219,.12)',  border: 'rgba(52,152,219,.3)'  },
-  shipped:   { color: T.purple, bg: 'rgba(155,89,182,.12)', border: 'rgba(155,89,182,.3)'  },
-  delivered: { color: T.green,  bg: 'rgba(39,174,96,.12)',   border: 'rgba(39,174,96,.3)'   },
-  cancelled: { color: T.red,    bg: 'rgba(231,76,60,.12)',   border: 'rgba(231,76,60,.3)'   },
+  pending:   { color: T.orange, bg: T.orangeBg, border: T.orangeBdr, label: 'Pending'   },
+  confirmed: { color: T.blue,   bg: T.blueBg,   border: T.blueBdr,   label: 'Confirmed' },
+  shipped:   { color: T.purple, bg: T.purpleBg, border: T.purpleBdr, label: 'Shipped'   },
+  delivered: { color: T.green,  bg: T.greenBg,  border: T.greenBdr,  label: 'Delivered' },
+  cancelled: { color: T.red,    bg: T.redBg,    border: T.redBdr,    label: 'Cancelled' },
 };
 
-/* ─────────────────────────────────────────
-   Tiny reusable pieces
-───────────────────────────────────────── */
+/* ── Sub-components ── */
 function StatCard({ icon, label, value, sub, color }) {
   return (
     <div style={{
       background: T.card, border: `1px solid ${T.border}`,
       borderRadius: 12, padding: '20px 22px',
-      borderLeft: `3px solid ${color}`,
-      position: 'relative', overflow: 'hidden',
+      borderTop: `3px solid ${color}`,
+      boxShadow: '0 2px 8px rgba(0,0,0,.04)',
     }}>
-      <div style={{ fontSize: 28, position: 'absolute', top: 16, right: 16, opacity: .22 }}>{icon}</div>
-      <div style={{ fontSize: 10, color: T.muted, letterSpacing: 2.5, textTransform: 'uppercase', fontWeight: 700, marginBottom: 10 }}>{label}</div>
-      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 36, letterSpacing: 1, color: T.text, lineHeight: 1 }}>{value}</div>
-      {sub && <div style={{ fontSize: 12, color: T.muted, marginTop: 5 }}>{sub}</div>}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <div style={{ fontSize: 10, color: T.muted, letterSpacing: 2.5, textTransform: 'uppercase', fontWeight: 700, marginBottom: 10 }}>{label}</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 36, letterSpacing: 1, color: T.ink, lineHeight: 1 }}>{value}</div>
+          {sub && <div style={{ fontSize: 12, color: T.muted, marginTop: 5 }}>{sub}</div>}
+        </div>
+        <div style={{ fontSize: 26, opacity: .5 }}>{icon}</div>
+      </div>
     </div>
   );
 }
 
 function Panel({ children, style = {} }) {
   return (
-    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'hidden', ...style }}>
+    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,.04)', ...style }}>
       {children}
     </div>
   );
@@ -64,16 +75,14 @@ function Panel({ children, style = {} }) {
 
 function PanelHead({ title, right }) {
   return (
-    <div style={{ padding: '15px 20px', borderBottom: `1px solid ${T.border}`, background: T.card2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{title}</span>
+    <div style={{ padding: '15px 20px', borderBottom: `1px solid ${T.border}`, background: T.beige, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <span style={{ fontSize: 13, fontWeight: 700, color: T.ink, letterSpacing: .3 }}>{title}</span>
       {right}
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   Dashboard
-───────────────────────────────────────── */
+/* ── Dashboard ── */
 export default function AdminDashboard() {
   const [orders,  setOrders]  = useState([]);
   const [loading, setLoading] = useState(true);
@@ -102,23 +111,28 @@ export default function AdminDashboard() {
   const statusCount = {};
   orders.forEach(o => { statusCount[o.orderStatus] = (statusCount[o.orderStatus] || 0) + 1; });
 
-  const tooltipStyle = { background: T.card2, border: `1px solid ${T.border}`, color: T.text, borderRadius: 8, fontSize: 12 };
+  const tooltipStyle = {
+    background: T.card, border: `1px solid ${T.border}`,
+    color: T.ink, borderRadius: 8, fontSize: 12,
+    boxShadow: '0 4px 16px rgba(0,0,0,.08)',
+  };
 
   if (loading) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 14 }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ width: 36, height: 36, border: `3px solid ${T.border}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+      <div style={{ width: 36, height: 36, border: `3px solid ${T.sand}`, borderTopColor: T.gold, borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
       <span style={{ fontSize: 11, color: T.muted, letterSpacing: 2 }}>LOADING…</span>
     </div>
   );
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Inter',sans-serif" }}>
+    <div style={{ fontFamily: "'DM Sans','Inter',sans-serif", color: T.ink }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 10, color: T.accent, letterSpacing: 3, marginBottom: 5, textTransform: 'uppercase', fontWeight: 700 }}>Overview</div>
-        <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, letterSpacing: 2, color: T.text, margin: 0 }}>Dashboard</h1>
+        <div style={{ fontSize: 10, color: T.gold, letterSpacing: 3, marginBottom: 5, textTransform: 'uppercase', fontWeight: 700 }}>Overview</div>
+        <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, letterSpacing: 2, color: T.ink, margin: 0 }}>Dashboard</h1>
         <p style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
           {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </p>
@@ -126,7 +140,7 @@ export default function AdminDashboard() {
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
-        <StatCard icon="💰" label="Total Revenue" value={`₹${revenue.toLocaleString()}`}  sub="Excl. cancelled"    color={T.accent} />
+        <StatCard icon="💰" label="Total Revenue" value={`₹${revenue.toLocaleString()}`}  sub="Excl. cancelled"    color={T.gold}   />
         <StatCard icon="📦" label="Total Orders"  value={orders.length}                    sub={`${pending} pending`} color={T.blue}   />
         <StatCard icon="✅" label="Delivered"     value={delivered}                        sub="Successfully"      color={T.green}  />
         <StatCard icon="❌" label="Cancelled"     value={cancelled}                        sub="Need review"       color={T.red}    />
@@ -141,17 +155,17 @@ export default function AdminDashboard() {
           <div style={{ padding: 20 }}>
             {chartData.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0', color: T.muted }}>
-                <div style={{ fontSize: 32, opacity: .35, marginBottom: 8 }}>📊</div>
-                <div style={{ fontSize: 13 }}>No data yet — orders will show here</div>
+                <div style={{ fontSize: 32, opacity: .4, marginBottom: 8 }}>📊</div>
+                <div style={{ fontSize: 13 }}>No data yet — orders will appear here</div>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={T.card2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={T.sand} />
                   <XAxis dataKey="date" stroke={T.muted} fontSize={11} tickLine={false} />
                   <YAxis stroke={T.muted} fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip contentStyle={tooltipStyle} formatter={v => [`₹${v.toLocaleString()}`, 'Revenue']} />
-                  <Bar dataKey="revenue" fill={T.accent} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="revenue" fill={T.gold} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -166,14 +180,14 @@ export default function AdminDashboard() {
               <div style={{ textAlign: 'center', padding: '40px 0', color: T.muted, fontSize: 13 }}>No orders yet</div>
             ) : (
               Object.entries(statusCount).map(([status, count]) => {
-                const cfg = STATUS_CFG[status] || { color: T.muted };
+                const cfg = STATUS_CFG[status] || { color: T.muted, label: status };
                 return (
                   <div key={status} style={{ marginBottom: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7, fontSize: 13 }}>
-                      <span style={{ color: cfg.color, fontWeight: 600, textTransform: 'capitalize' }}>{status}</span>
+                      <span style={{ color: cfg.color, fontWeight: 600, textTransform: 'capitalize' }}>{cfg.label}</span>
                       <span style={{ color: T.muted }}>{count} / {orders.length}</span>
                     </div>
-                    <div style={{ background: T.card2, borderRadius: 4, height: 6 }}>
+                    <div style={{ background: T.sand, borderRadius: 4, height: 6 }}>
                       <div style={{ background: cfg.color, height: '100%', borderRadius: 4, width: `${(count / orders.length) * 100}%`, transition: 'width .5s' }} />
                     </div>
                   </div>
@@ -191,11 +205,11 @@ export default function AdminDashboard() {
           <div style={{ padding: 20 }}>
             <ResponsiveContainer width="100%" height={150}>
               <LineChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={T.card2} />
+                <CartesianGrid strokeDasharray="3 3" stroke={T.sand} />
                 <XAxis dataKey="date" stroke={T.muted} fontSize={11} tickLine={false} />
                 <YAxis stroke={T.muted} fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip contentStyle={tooltipStyle} formatter={v => [v, 'Orders']} />
-                <Line type="monotone" dataKey="orders" stroke={T.blue} strokeWidth={2} dot={{ fill: T.blue, r: 4 }} />
+                <Line type="monotone" dataKey="orders" stroke={T.gold} strokeWidth={2} dot={{ fill: T.gold, r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -206,48 +220,52 @@ export default function AdminDashboard() {
       <Panel>
         <PanelHead
           title="Recent Orders"
-          right={<Link to="/admin/orders" style={{ fontSize: 12, color: T.accent, textDecoration: 'none', fontWeight: 600 }}>View all →</Link>}
+          right={
+            <Link to="/admin/orders" style={{ fontSize: 12, color: T.gold2, textDecoration: 'none', fontWeight: 700, letterSpacing: .5 }}>
+              View all →
+            </Link>
+          }
         />
         {orders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '56px 20px' }}>
-            <div style={{ fontSize: 40, opacity: .35, marginBottom: 12 }}>🚀</div>
-            <div style={{ fontSize: 14, color: T.text2, fontWeight: 600, marginBottom: 6 }}>No orders yet</div>
+            <div style={{ fontSize: 40, opacity: .3, marginBottom: 12 }}>🚀</div>
+            <div style={{ fontSize: 14, color: T.ink2, fontWeight: 600, marginBottom: 6 }}>No orders yet</div>
             <div style={{ fontSize: 13, color: T.muted }}>Share your store and watch orders roll in!</div>
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#0f0f1a' }}>
+                <tr style={{ background: T.beige }}>
                   {['Order ID', 'Customer', 'Amount', 'Items', 'Status', 'Date'].map(h => (
                     <th key={h} style={{ padding: '10px 18px', textAlign: 'left', fontSize: 10, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, borderBottom: `1px solid ${T.border}` }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {orders.slice(0, 7).map(order => {
-                  const cfg = STATUS_CFG[order.orderStatus] || { color: T.muted, bg: T.card2, border: T.border };
+                {orders.slice(0, 7).map((order, i) => {
+                  const cfg = STATUS_CFG[order.orderStatus] || { color: T.muted, bg: T.beige, border: T.border, label: order.orderStatus };
                   return (
                     <tr key={order._id}
-                      style={{ borderBottom: `1px solid #12121e`, transition: 'background .15s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.025)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <td style={{ padding: '13px 18px', fontFamily: 'monospace', fontSize: 12, color: T.accent, fontWeight: 600 }}>
+                      style={{ borderBottom: `1px solid ${T.border}`, transition: 'background .15s', background: i % 2 === 0 ? T.card : T.bg }}
+                      onMouseEnter={e => e.currentTarget.style.background = T.beige}
+                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? T.card : T.bg}>
+                      <td style={{ padding: '13px 18px', fontFamily: 'monospace', fontSize: 12, color: T.gold2, fontWeight: 700 }}>
                         #{order._id.slice(-7).toUpperCase()}
                       </td>
                       <td style={{ padding: '13px 18px' }}>
-                        <div style={{ fontWeight: 600, fontSize: 13, color: T.text }}>{order.user?.name || 'Guest'}</div>
+                        <div style={{ fontWeight: 600, fontSize: 13, color: T.ink }}>{order.user?.name || 'Guest'}</div>
                         <div style={{ fontSize: 11, color: T.muted }}>{order.user?.email}</div>
                       </td>
-                      <td style={{ padding: '13px 18px', fontFamily: "'Bebas Neue',sans-serif", fontSize: 20, color: T.text, letterSpacing: 1 }}>
+                      <td style={{ padding: '13px 18px', fontFamily: "'Bebas Neue',sans-serif", fontSize: 20, color: T.ink, letterSpacing: 1 }}>
                         ₹{order.total?.toLocaleString()}
                       </td>
-                      <td style={{ padding: '13px 18px', fontSize: 13, color: T.text2 }}>
+                      <td style={{ padding: '13px 18px', fontSize: 13, color: T.ink2 }}>
                         {order.items?.length} item{order.items?.length !== 1 ? 's' : ''}
                       </td>
                       <td style={{ padding: '13px 18px' }}>
                         <span style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`, padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, textTransform: 'capitalize' }}>
-                          {order.orderStatus}
+                          {cfg.label}
                         </span>
                       </td>
                       <td style={{ padding: '13px 18px', fontSize: 12, color: T.muted }}>

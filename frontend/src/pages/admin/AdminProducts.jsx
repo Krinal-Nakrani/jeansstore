@@ -1,33 +1,46 @@
 import { useState, useEffect } from 'react';
 import { getProducts, createProduct, updateProduct, deleteProduct } from '../../services/api';
 
-/* ── Design tokens ── */
+/* ── Light theme tokens ── */
 const T = {
-  card:    '#161620',
-  card2:   '#1e1e2e',
-  border:  '#2a2a3e',
-  accent:  '#c8a96e',
-  text:    '#f0f0f0',
-  text2:   '#aaaaaa',
-  muted:   '#55556a',
-  red:     '#e74c3c',
-  green:   '#27ae60',
-  orange:  '#f39c12',
+  bg:       '#faf7f2',
+  beige:    '#f0ebe1',
+  sand:     '#e2d9cc',
+  card:     '#ffffff',
+  border:   '#e0d8ce',
+  ink:      '#1c1c1c',
+  ink2:     '#4a4a4a',
+  muted:    '#9a9080',
+  gold:     '#b89b6a',
+  gold2:    '#8a7048',
+  red:      '#c0392b',
+  redBg:    '#fef0ee',
+  redBdr:   '#f5c0bb',
+  green:    '#2d7a4f',
+  greenBg:  '#edf7f2',
+  greenBdr: '#a8dfc0',
+  orange:   '#b07d0e',
 };
 
 const CATEGORIES = ['Jeans', 'Cargo', 'Shorts', 'Joggers', 'Shirts', 'Other'];
 const EMPTY = { name: '', description: '', price: '', originalPrice: '', stock: '', sizes: '', colors: '', category: 'Jeans', tags: '', images: '' };
 
 function Field({ label, name, form, setForm, placeholder, type = 'text', rows }) {
-  const base = { width: '100%', background: '#0f0f1a', border: `1.5px solid ${T.border}`, color: T.text, borderRadius: 8, padding: '10px 14px', fontSize: 13, fontFamily: 'inherit', outline: 'none', transition: 'border-color .2s' };
+  const base = {
+    width: '100%', background: T.bg,
+    border: `1.5px solid ${T.border}`, color: T.ink,
+    borderRadius: 8, padding: '10px 14px',
+    fontSize: 13, fontFamily: 'inherit', outline: 'none',
+    transition: 'border-color .2s', boxSizing: 'border-box',
+  };
   return (
     <div style={{ marginBottom: 16 }}>
       <label style={{ display: 'block', fontSize: 10, color: T.muted, marginBottom: 7, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700 }}>{label}</label>
       {rows
         ? <textarea rows={rows} value={form[name] || ''} onChange={e => setForm(f => ({ ...f, [name]: e.target.value }))} placeholder={placeholder} style={{ ...base, resize: 'vertical' }}
-            onFocus={e => e.target.style.borderColor = T.accent} onBlur={e => e.target.style.borderColor = T.border} />
+            onFocus={e => e.target.style.borderColor = T.gold} onBlur={e => e.target.style.borderColor = T.border} />
         : <input type={type} value={form[name] || ''} onChange={e => setForm(f => ({ ...f, [name]: e.target.value }))} placeholder={placeholder} style={base}
-            onFocus={e => e.target.style.borderColor = T.accent} onBlur={e => e.target.style.borderColor = T.border} />
+            onFocus={e => e.target.style.borderColor = T.gold} onBlur={e => e.target.style.borderColor = T.border} />
       }
     </div>
   );
@@ -106,50 +119,49 @@ export default function AdminProducts() {
   );
 
   const stockColor = s => s === 0 ? T.red : s < 5 ? T.orange : T.green;
-  const sBtn = (bg, color, bdr) => ({ background: bg, color, border: bdr, borderRadius: 7, padding: '6px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'opacity .15s' });
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Inter',sans-serif" }}>
+    <div style={{ fontFamily: "'DM Sans','Inter',sans-serif", color: T.ink }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes fadeUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
 
       {/* Toast */}
       {toast.msg && (
-        <div style={{ position: 'fixed', bottom: 28, right: 28, zIndex: 9999, background: T.card2, borderLeft: `3px solid ${toast.ok ? T.accent : T.red}`, border: `1px solid ${toast.ok ? T.accent : T.red}`, color: T.text, padding: '12px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600, animation: 'fadeUp .3s ease', display: 'flex', alignItems: 'center', gap: 8 }}>
-          {toast.ok ? '✓' : '✕'} {toast.msg}
+        <div style={{ position: 'fixed', bottom: 28, right: 28, zIndex: 9999, background: T.card, borderLeft: `3px solid ${toast.ok ? T.gold : T.red}`, border: `1px solid ${toast.ok ? T.border : T.redBdr}`, color: T.ink, padding: '12px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600, animation: 'fadeUp .3s ease', boxShadow: '0 8px 24px rgba(0,0,0,.12)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: toast.ok ? T.gold : T.red }}>{toast.ok ? '✓' : '✕'}</span> {toast.msg}
         </div>
       )}
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <div style={{ fontSize: 10, color: T.accent, letterSpacing: 3, marginBottom: 5, textTransform: 'uppercase', fontWeight: 700 }}>Manage</div>
-          <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, letterSpacing: 2, color: T.text, margin: 0 }}>Products</h1>
+          <div style={{ fontSize: 10, color: T.gold, letterSpacing: 3, marginBottom: 5, textTransform: 'uppercase', fontWeight: 700 }}>Manage</div>
+          <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, letterSpacing: 2, color: T.ink, margin: 0 }}>Products</h1>
           <p style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>{products.length} total products</p>
         </div>
-        <button onClick={openAdd} style={{ background: `linear-gradient(135deg,${T.accent},#a07840)`, color: '#000', border: 'none', borderRadius: 8, padding: '11px 22px', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: .5 }}>
+        <button onClick={openAdd} style={{ background: T.ink, color: '#fff', border: 'none', borderRadius: 8, padding: '11px 22px', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: 1, textTransform: 'uppercase' }}>
           + Add Product
         </button>
       </div>
 
       {/* Search */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', background: '#0f0f1a', border: `1.5px solid ${T.border}`, borderRadius: 8, overflow: 'hidden', flex: 1, maxWidth: 360 }}
-          onFocusCapture={e => e.currentTarget.style.borderColor = T.accent}
+        <div style={{ display: 'flex', alignItems: 'center', background: T.card, border: `1.5px solid ${T.border}`, borderRadius: 8, overflow: 'hidden', flex: 1, maxWidth: 360, transition: 'border-color .2s' }}
+          onFocusCapture={e => e.currentTarget.style.borderColor = T.gold}
           onBlurCapture={e => e.currentTarget.style.borderColor = T.border}>
           <span style={{ padding: '0 12px', color: T.muted }}>🔍</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or category…"
-            style={{ flex: 1, background: 'transparent', border: 'none', color: T.text, padding: '10px 0', fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+            style={{ flex: 1, background: 'transparent', border: 'none', color: T.ink, padding: '10px 0', fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
           {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: T.muted, cursor: 'pointer', paddingRight: 12, fontSize: 18 }}>×</button>}
         </div>
         <span style={{ fontSize: 13, color: T.muted }}>{filtered.length} of {products.length}</span>
       </div>
 
       {/* Table */}
-      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'hidden' }}>
+      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#0f0f1a' }}>
+              <tr style={{ background: T.beige }}>
                 {['Product', 'Category', 'Price', 'Stock', 'Sizes', 'Status', 'Actions'].map(h => (
                   <th key={h} style={{ padding: '11px 18px', textAlign: 'left', fontSize: 10, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, borderBottom: `1px solid ${T.border}` }}>{h}</th>
                 ))}
@@ -158,64 +170,69 @@ export default function AdminProducts() {
             <tbody>
               {loading ? (
                 <tr><td colSpan={7} style={{ padding: 60, textAlign: 'center' }}>
-                  <div style={{ width: 34, height: 34, border: `3px solid ${T.border}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'spin .8s linear infinite', margin: '0 auto' }} />
+                  <div style={{ width: 34, height: 34, border: `3px solid ${T.sand}`, borderTopColor: T.gold, borderRadius: '50%', animation: 'spin .8s linear infinite', margin: '0 auto' }} />
                 </td></tr>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: '56px 20px' }}>
-                  <div style={{ fontSize: 40, marginBottom: 12, opacity: .35 }}>👖</div>
-                  <div style={{ fontSize: 14, color: T.text2, fontWeight: 600, marginBottom: 14 }}>{search ? 'No products match' : 'No products yet'}</div>
-                  <button onClick={search ? () => setSearch('') : openAdd} style={sBtn(`rgba(200,169,110,.1)`, T.accent, `1px solid rgba(200,169,110,.25)`)}>
+                  <div style={{ fontSize: 40, marginBottom: 12, opacity: .3 }}>👖</div>
+                  <div style={{ fontSize: 14, color: T.ink2, fontWeight: 600, marginBottom: 14 }}>{search ? 'No products match' : 'No products yet'}</div>
+                  <button onClick={search ? () => setSearch('') : openAdd}
+                    style={{ background: T.beige, color: T.gold2, border: `1px solid ${T.border}`, padding: '8px 18px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 12 }}>
                     {search ? 'Clear search' : '+ Add First Product'}
                   </button>
                 </td></tr>
-              ) : filtered.map(p => {
+              ) : filtered.map((p, i) => {
                 const hasDiscount = p.originalPrice && p.originalPrice > p.price;
                 const pct = hasDiscount ? Math.round((1 - p.price / p.originalPrice) * 100) : null;
                 return (
-                  <tr key={p._id} style={{ borderBottom: `1px solid #12121e`, transition: 'background .15s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.025)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <tr key={p._id}
+                    style={{ borderBottom: `1px solid ${T.border}`, transition: 'background .15s', background: i % 2 === 0 ? T.card : T.bg }}
+                    onMouseEnter={e => e.currentTarget.style.background = T.beige}
+                    onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? T.card : T.bg}>
                     <td style={{ padding: '13px 18px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{ width: 46, height: 52, background: T.card2, borderRadius: 8, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${T.border}`, fontSize: 20 }}>
+                        <div style={{ width: 44, height: 50, background: T.sand, borderRadius: 8, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${T.border}`, fontSize: 18 }}>
                           {p.images?.[0] ? <img src={p.images[0]} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '👖'}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: 13, color: T.text }}>{p.name}</div>
+                          <div style={{ fontWeight: 600, fontSize: 13, color: T.ink }}>{p.name}</div>
                           {pct && <div style={{ fontSize: 10, color: T.red, fontWeight: 700, marginTop: 2 }}>–{pct}% OFF</div>}
                         </div>
                       </div>
                     </td>
                     <td style={{ padding: '13px 18px' }}>
-                      <span style={{ background: 'rgba(200,169,110,.1)', color: T.accent, border: '1px solid rgba(200,169,110,.2)', padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600 }}>{p.category || '—'}</span>
+                      <span style={{ background: T.beige, color: T.gold2, border: `1px solid ${T.sand}`, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700 }}>{p.category || '—'}</span>
                     </td>
                     <td style={{ padding: '13px 18px' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 20, color: T.text, letterSpacing: 1 }}>₹{p.price?.toLocaleString()}</div>
+                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 20, color: T.ink, letterSpacing: 1 }}>₹{p.price?.toLocaleString()}</div>
                       {hasDiscount && <div style={{ fontSize: 11, color: T.muted, textDecoration: 'line-through' }}>₹{p.originalPrice?.toLocaleString()}</div>}
                     </td>
                     <td style={{ padding: '13px 18px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <span style={{ fontWeight: 700, fontSize: 15, color: stockColor(p.stock) }}>{p.stock}</span>
-                        <span style={{ fontSize: 9, fontWeight: 700, color: stockColor(p.stock), letterSpacing: 1 }}>{p.stock === 0 ? 'OUT' : p.stock < 5 ? 'LOW' : 'OK'}</span>
-                      </div>
+                      <span style={{ fontWeight: 700, fontSize: 15, color: stockColor(p.stock) }}>{p.stock}</span>
+                      <span style={{ fontSize: 9, fontWeight: 700, color: stockColor(p.stock), letterSpacing: 1, marginLeft: 4 }}>{p.stock === 0 ? 'OUT' : p.stock < 5 ? 'LOW' : 'OK'}</span>
                     </td>
                     <td style={{ padding: '13px 18px' }}>
                       {p.sizes?.length > 0
                         ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                            {p.sizes.map(s => <span key={s} style={{ background: T.card2, border: `1px solid ${T.border}`, color: T.text2, padding: '2px 7px', borderRadius: 4, fontSize: 11 }}>{s}</span>)}
+                            {p.sizes.map(s => <span key={s} style={{ background: T.beige, border: `1px solid ${T.border}`, color: T.ink2, padding: '2px 7px', borderRadius: 4, fontSize: 11, fontWeight: 600 }}>{s}</span>)}
                           </div>
                         : <span style={{ color: T.muted }}>—</span>
                       }
                     </td>
                     <td style={{ padding: '13px 18px' }}>
-                      <span style={{ background: p.isActive !== false ? 'rgba(39,174,96,.12)' : 'rgba(231,76,60,.12)', color: p.isActive !== false ? T.green : T.red, border: `1px solid ${p.isActive !== false ? 'rgba(39,174,96,.3)' : 'rgba(231,76,60,.3)'}`, padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700 }}>
+                      <span style={{
+                        background: p.isActive !== false ? T.greenBg : T.redBg,
+                        color:      p.isActive !== false ? T.green   : T.red,
+                        border:    `1px solid ${p.isActive !== false ? T.greenBdr : T.redBdr}`,
+                        padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                      }}>
                         {p.isActive !== false ? 'Active' : 'Hidden'}
                       </span>
                     </td>
                     <td style={{ padding: '13px 18px' }}>
                       <div style={{ display: 'flex', gap: 7 }}>
-                        <button onClick={() => openEdit(p)} style={sBtn('rgba(200,169,110,.1)', T.accent, '1px solid rgba(200,169,110,.25)')}>✏ Edit</button>
-                        <button onClick={() => setDeleting({ id: p._id, name: p.name })} style={sBtn('rgba(231,76,60,.1)', T.red, '1px solid rgba(231,76,60,.25)')}>🗑</button>
+                        <button onClick={() => openEdit(p)} style={{ background: T.beige, color: T.gold2, border: `1px solid ${T.border}`, padding: '6px 13px', borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}>✏ Edit</button>
+                        <button onClick={() => setDeleting({ id: p._id, name: p.name })} style={{ background: T.redBg, color: T.red, border: `1px solid ${T.redBdr}`, padding: '6px 13px', borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}>🗑</button>
                       </div>
                     </td>
                   </tr>
@@ -228,12 +245,12 @@ export default function AdminProducts() {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, width: '100%', maxWidth: 600, maxHeight: '90vh', overflowY: 'auto', animation: 'fadeUp .25s ease' }}>
-            <div style={{ padding: '18px 24px', borderBottom: `1px solid ${T.border}`, background: T.card2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 1 }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(28,28,28,.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, width: '100%', maxWidth: 600, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.15)', animation: 'fadeUp .25s ease' }}>
+            <div style={{ padding: '18px 24px', borderBottom: `1px solid ${T.border}`, background: T.beige, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 1 }}>
               <div>
-                <div style={{ fontSize: 10, color: T.accent, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 2 }}>{editing ? 'Editing' : 'New'}</div>
-                <h3 style={{ margin: 0, fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, letterSpacing: 2, color: T.text }}>{editing ? 'Edit Product' : 'Add New Product'}</h3>
+                <div style={{ fontSize: 10, color: T.gold, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 2 }}>{editing ? 'Editing' : 'New'}</div>
+                <h3 style={{ margin: 0, fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, letterSpacing: 2, color: T.ink }}>{editing ? 'Edit Product' : 'Add New Product'}</h3>
               </div>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: T.muted, cursor: 'pointer', fontSize: 22 }}>×</button>
             </div>
@@ -246,8 +263,8 @@ export default function AdminProducts() {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ display: 'block', fontSize: 10, color: T.muted, marginBottom: 7, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700 }}>Category</label>
                   <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                    style={{ width: '100%', background: '#0f0f1a', border: `1.5px solid ${T.border}`, color: T.text, borderRadius: 8, padding: '10px 14px', fontSize: 13, fontFamily: 'inherit', outline: 'none', cursor: 'pointer' }}>
-                    {CATEGORIES.map(c => <option key={c} value={c} style={{ background: T.card }}>{c}</option>)}
+                    style={{ width: '100%', background: T.bg, border: `1.5px solid ${T.border}`, color: T.ink, borderRadius: 8, padding: '10px 14px', fontSize: 13, fontFamily: 'inherit', outline: 'none', cursor: 'pointer' }}>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div style={{ gridColumn: '1/-1' }}><Field label="Description" name="description" form={form} setForm={setForm} placeholder="Describe the product…" rows={3} /></div>
@@ -257,8 +274,8 @@ export default function AdminProducts() {
                 <div style={{ gridColumn: '1/-1' }}><Field label="Image URLs (comma sep.)" name="images" form={form} setForm={setForm} placeholder="https://… , https://…" /></div>
               </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-                <button onClick={() => setShowModal(false)} style={{ flex: 1, background: 'transparent', border: `1px solid ${T.border}`, color: T.text2, padding: 12, borderRadius: 8, cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', fontWeight: 600 }}>Cancel</button>
-                <button onClick={handleSave} disabled={saving} style={{ flex: 2, background: `linear-gradient(135deg,${T.accent},#a07840)`, border: 'none', color: '#000', padding: 12, borderRadius: 8, cursor: saving ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', opacity: saving ? .7 : 1 }}>
+                <button onClick={() => setShowModal(false)} style={{ flex: 1, background: T.beige, border: `1px solid ${T.border}`, color: T.ink2, padding: 12, borderRadius: 8, cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', fontWeight: 600 }}>Cancel</button>
+                <button onClick={handleSave} disabled={saving} style={{ flex: 2, background: T.ink, border: 'none', color: '#fff', padding: 12, borderRadius: 8, cursor: saving ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', opacity: saving ? .7 : 1 }}>
                   {saving ? 'Saving…' : editing ? '✓ Update Product' : '+ Add Product'}
                 </button>
               </div>
@@ -269,16 +286,16 @@ export default function AdminProducts() {
 
       {/* Delete Confirm Modal */}
       {deleting && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 28, maxWidth: 380, width: '100%', textAlign: 'center', animation: 'fadeUp .25s ease' }}>
-            <div style={{ fontSize: 38, marginBottom: 12, opacity: .65 }}>🗑️</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: T.text, marginBottom: 8 }}>Delete Product?</div>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(28,28,28,.55)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 28, maxWidth: 380, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.15)', animation: 'fadeUp .25s ease' }}>
+            <div style={{ fontSize: 38, marginBottom: 12, opacity: .6 }}>🗑️</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: T.ink, marginBottom: 8 }}>Delete Product?</div>
             <div style={{ fontSize: 13, color: T.muted, marginBottom: 24 }}>
-              "<strong style={{ color: T.text2 }}>{deleting.name}</strong>" will be permanently removed.
+              "<strong style={{ color: T.ink2 }}>{deleting.name}</strong>" will be permanently removed.
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setDeleting(null)} style={{ flex: 1, background: 'transparent', border: `1px solid ${T.border}`, color: T.text2, padding: 11, borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>Cancel</button>
-              <button onClick={confirmDelete} style={{ flex: 1, background: 'rgba(231,76,60,.12)', border: '1px solid rgba(231,76,60,.3)', color: T.red, padding: 11, borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700 }}>Delete</button>
+              <button onClick={() => setDeleting(null)} style={{ flex: 1, background: T.beige, border: `1px solid ${T.border}`, color: T.ink2, padding: 11, borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>Cancel</button>
+              <button onClick={confirmDelete} style={{ flex: 1, background: T.redBg, border: `1px solid ${T.redBdr}`, color: T.red, padding: 11, borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700 }}>Delete</button>
             </div>
           </div>
         </div>
