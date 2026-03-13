@@ -1,29 +1,80 @@
 import { useState, useEffect } from 'react';
 import { getAllOrders, updateStatus } from '../../services/api';
 
-const STATUS_CONFIG = {
-  pending:   { color: 'var(--orange)', bg: 'rgba(243,156,18,.12)',  border: 'rgba(243,156,18,.28)',  label: 'Pending'   },
-  confirmed: { color: 'var(--blue)',   bg: 'rgba(52,152,219,.12)',  border: 'rgba(52,152,219,.28)',  label: 'Confirmed' },
-  shipped:   { color: 'var(--purple)', bg: 'rgba(155,89,182,.12)', border: 'rgba(155,89,182,.28)', label: 'Shipped'   },
-  delivered: { color: 'var(--green)',  bg: 'rgba(39,174,96,.12)',   border: 'rgba(39,174,96,.28)',   label: 'Delivered' },
-  cancelled: { color: 'var(--red)',    bg: 'rgba(231,76,60,.12)',   border: 'rgba(231,76,60,.28)',   label: 'Cancelled' },
+/* ── Light theme tokens ── */
+const T = {
+  bg:        '#faf7f2',
+  beige:     '#f0ebe1',
+  sand:      '#e2d9cc',
+  card:      '#ffffff',
+  border:    '#e0d8ce',
+  ink:       '#1c1c1c',
+  ink2:      '#4a4a4a',
+  muted:     '#9a9080',
+  gold:      '#b89b6a',
+  gold2:     '#8a7048',
+  red:       '#c0392b',   redBg:    '#fef0ee', redBdr:    '#f5c0bb',
+  green:     '#2d7a4f',   greenBg:  '#edf7f2', greenBdr:  '#a8dfc0',
+  blue:      '#1a5fa8',   blueBg:   '#edf4fd', blueBdr:   '#b3d1f5',
+  purple:    '#6b3fa0',   purpleBg: '#f5f0fc', purpleBdr: '#d5bcf5',
+  orange:    '#b07d0e',   orangeBg: '#fef9ec', orangeBdr: '#f5e0a0',
+};
+
+const STATUS_CFG = {
+  pending:   { color: T.orange, bg: T.orangeBg, border: T.orangeBdr, label: 'Pending'   },
+  confirmed: { color: T.blue,   bg: T.blueBg,   border: T.blueBdr,   label: 'Confirmed' },
+  shipped:   { color: T.purple, bg: T.purpleBg, border: T.purpleBdr, label: 'Shipped'   },
+  delivered: { color: T.green,  bg: T.greenBg,  border: T.greenBdr,  label: 'Delivered' },
+  cancelled: { color: T.red,    bg: T.redBg,    border: T.redBdr,    label: 'Cancelled' },
 };
 const STATUSES = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+const PAY_ICON = { cod: '💵', online: '💳', razorpay: '📱' };
 
-const PAYMENT_ICON = { cod: '💵', online: '💳', razorpay: '📱' };
+/* ── Stat card ── */
+function StatCard({ icon, label, value, sub, color }) {
+  return (
+    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: '18px 20px', borderTop: `3px solid ${color}`, boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontSize: 10, color: T.muted, letterSpacing: 2.5, textTransform: 'uppercase', fontWeight: 700, marginBottom: 8 }}>{label}</div>
+          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 34, letterSpacing: 1, color: T.ink, lineHeight: 1 }}>{value}</div>
+          {sub && <div style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>{sub}</div>}
+        </div>
+        <div style={{ fontSize: 24, opacity: .45 }}>{icon}</div>
+      </div>
+    </div>
+  );
+}
 
+/* ── Filter tab ── */
+function FilterTab({ label, count, active, color, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: '7px 16px', borderRadius: 20, cursor: 'pointer',
+      fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
+      border:     `1px solid ${active ? color : T.border}`,
+      background: active ? `${color}18` : T.card,
+      color:      active ? color : T.muted,
+      transition: 'all .15s',
+    }}>
+      {label} <span style={{ opacity: .65 }}>({count})</span>
+    </button>
+  );
+}
+
+/* ── Main ── */
 export default function AdminOrders() {
   const [orders,   setOrders]   = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [filter,   setFilter]   = useState('all');
   const [expanded, setExpanded] = useState(null);
   const [updating, setUpdating] = useState(null);
-  const [toast,    setToast]    = useState({ msg: '', type: 'success' });
   const [search,   setSearch]   = useState('');
+  const [toast,    setToast]    = useState({ msg: '', ok: true });
 
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: '', type: 'success' }), 2500);
+  const showToast = (msg, ok = true) => {
+    setToast({ msg, ok });
+    setTimeout(() => setToast({ msg: '', ok: true }), 2500);
   };
 
   const load = () => {
@@ -41,9 +92,9 @@ export default function AdminOrders() {
     try {
       await updateStatus(id, status);
       setOrders(prev => prev.map(o => o._id === id ? { ...o, orderStatus: status } : o));
-      showToast(`Status updated → ${status}`);
+      showToast(`Status → ${status}`);
     } catch (err) {
-      showToast(err?.response?.data?.message || 'Update failed', 'error');
+      showToast(err?.response?.data?.message || 'Update failed', false);
     } finally { setUpdating(null); }
   };
 
@@ -54,257 +105,193 @@ export default function AdminOrders() {
 
   const filtered = orders
     .filter(o => filter === 'all' || o.orderStatus === filter)
-    .filter(o =>
-      !search ||
+    .filter(o => !search ||
       o._id.toLowerCase().includes(search.toLowerCase()) ||
       o.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
       o.user?.email?.toLowerCase().includes(search.toLowerCase())
     );
 
   return (
-    <div>
-      {/* ── Toast ── */}
+    <div style={{ fontFamily: "'DM Sans','Inter',sans-serif", color: T.ink }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes fadeUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
+
+      {/* Toast */}
       {toast.msg && (
-        <div className="toast" style={{ borderLeft: `3px solid ${toast.type === 'error' ? 'var(--red)' : 'var(--accent)'}` }}>
-          {toast.type === 'error' ? '✕' : '✓'} {toast.msg}
+        <div style={{ position: 'fixed', bottom: 28, right: 28, zIndex: 9999, background: T.card, borderLeft: `3px solid ${toast.ok ? T.gold : T.red}`, border: `1px solid ${toast.ok ? T.border : T.redBdr}`, color: T.ink, padding: '12px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600, animation: 'fadeUp .3s ease', boxShadow: '0 8px 24px rgba(0,0,0,.1)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: toast.ok ? T.gold : T.red }}>{toast.ok ? '✓' : '✕'}</span> {toast.msg}
         </div>
       )}
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: 3, marginBottom: 5, textTransform: 'uppercase', fontWeight: 700 }}>Manage</div>
-        <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 38, letterSpacing: 2, color: 'var(--text)', margin: 0 }}>Orders</h1>
-        <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>{orders.length} total orders</p>
+        <div style={{ fontSize: 10, color: T.gold, letterSpacing: 3, marginBottom: 5, textTransform: 'uppercase', fontWeight: 700 }}>Manage</div>
+        <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, letterSpacing: 2, color: T.ink, margin: 0 }}>Orders</h1>
+        <p style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>{orders.length} total orders</p>
       </div>
 
-      {/* ── Summary Strip ── */}
-      <div className="a-stats-grid" style={{ marginBottom: 24 }}>
-        <div className="a-stat-card" style={{ '--card-accent': 'var(--accent)' }}>
-          <div className="a-stat-icon">📦</div>
-          <div className="a-stat-label">Total Orders</div>
-          <div className="a-stat-value">{orders.length}</div>
-        </div>
-        <div className="a-stat-card" style={{ '--card-accent': 'var(--orange)' }}>
-          <div className="a-stat-icon">⏳</div>
-          <div className="a-stat-label">Pending</div>
-          <div className="a-stat-value">{counts.pending || 0}</div>
-          <div className="a-stat-sub">Need action</div>
-        </div>
-        <div className="a-stat-card" style={{ '--card-accent': 'var(--purple)' }}>
-          <div className="a-stat-icon">🚚</div>
-          <div className="a-stat-label">Shipped</div>
-          <div className="a-stat-value">{counts.shipped || 0}</div>
-        </div>
-        <div className="a-stat-card" style={{ '--card-accent': 'var(--green)' }}>
-          <div className="a-stat-icon">✅</div>
-          <div className="a-stat-label">Delivered</div>
-          <div className="a-stat-value">{counts.delivered || 0}</div>
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+        <StatCard icon="📦" label="Total Orders" value={orders.length}        sub=""             color={T.gold}   />
+        <StatCard icon="⏳" label="Pending"      value={counts.pending || 0}  sub="Need action"  color={T.orange} />
+        <StatCard icon="🚚" label="Shipped"      value={counts.shipped || 0}  sub=""             color={T.purple} />
+        <StatCard icon="✅" label="Delivered"    value={counts.delivered || 0} sub=""            color={T.green}  />
+      </div>
+
+      {/* Search */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', background: T.card, border: `1.5px solid ${T.border}`, borderRadius: 8, overflow: 'hidden', maxWidth: 380, transition: 'border-color .2s' }}
+          onFocusCapture={e => e.currentTarget.style.borderColor = T.gold}
+          onBlurCapture={e => e.currentTarget.style.borderColor = T.border}>
+          <span style={{ padding: '0 12px', color: T.muted }}>🔍</span>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, email or order ID…"
+            style={{ flex: 1, background: 'transparent', border: 'none', color: T.ink, padding: '10px 0', fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+          {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: T.muted, cursor: 'pointer', paddingRight: 12, fontSize: 18 }}>×</button>}
         </div>
       </div>
 
-      {/* ── Search ── */}
-      <div style={{ marginBottom: 16 }}>
-        <div className="a-search" style={{ maxWidth: 360 }}>
-          <span className="a-search-icon">🔍</span>
-          <input
-            className="a-search-input"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name, email or order ID…"
-          />
-          {search && (
-            <button onClick={() => setSearch('')} style={{ background:'none', border:'none', color:'var(--muted)', cursor:'pointer', paddingRight:12, fontSize:16 }}>×</button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Filter Tabs ── */}
+      {/* Filter tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        <FilterTab label="All" count={orders.length} active={filter === 'all'} color="var(--accent)" onClick={() => setFilter('all')} />
+        <FilterTab label="All" count={orders.length} active={filter === 'all'} color={T.gold2} onClick={() => setFilter('all')} />
         {STATUSES.map(s => (
-          <FilterTab key={s} label={STATUS_CONFIG[s].label} count={counts[s] || 0}
-            active={filter === s} color={STATUS_CONFIG[s].color} onClick={() => setFilter(s)} />
+          <FilterTab key={s} label={STATUS_CFG[s].label} count={counts[s] || 0}
+            active={filter === s} color={STATUS_CFG[s].color} onClick={() => setFilter(s)} />
         ))}
       </div>
 
-      {/* ── Orders List ── */}
+      {/* Orders list */}
       {loading ? (
-        <div className="a-panel">
-          <div className="a-spinner" />
+        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 60, textAlign: 'center' }}>
+          <div style={{ width: 34, height: 34, border: `3px solid ${T.sand}`, borderTopColor: T.gold, borderRadius: '50%', animation: 'spin .8s linear infinite', margin: '0 auto' }} />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="a-panel">
-          <div className="a-empty">
-            <div className="a-empty-icon">📦</div>
-            <div className="a-empty-title">No {filter !== 'all' ? filter : ''} orders found</div>
-            <div className="a-empty-sub">
-              {filter !== 'all'
-                ? <button className="a-btn a-btn-outline a-btn-sm" onClick={() => setFilter('all')}>Show all orders</button>
-                : 'Orders will appear here once customers start buying'
-              }
-            </div>
-          </div>
+        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: '60px 20px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
+          <div style={{ fontSize: 40, marginBottom: 12, opacity: .3 }}>📦</div>
+          <div style={{ fontSize: 14, color: T.ink2, fontWeight: 600, marginBottom: 8 }}>No {filter !== 'all' ? filter : ''} orders found</div>
+          {filter !== 'all' && (
+            <button onClick={() => setFilter('all')} style={{ background: T.beige, color: T.gold2, border: `1px solid ${T.border}`, padding: '8px 18px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 12 }}>
+              Show all orders
+            </button>
+          )}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filtered.map(order => {
-            const cfg       = STATUS_CONFIG[order.orderStatus] || STATUS_CONFIG.pending;
-            const isOpen    = expanded === order._id;
-            const isUpdating = updating === order._id;
+            const cfg      = STATUS_CFG[order.orderStatus] || STATUS_CFG.pending;
+            const isOpen   = expanded === order._id;
+            const isUpd    = updating === order._id;
 
             return (
-              <div key={order._id} className="a-panel" style={{ border: `1px solid ${isOpen ? 'rgba(200,169,110,.35)' : 'var(--a-border)'}`, transition: 'border-color .2s' }}>
+              <div key={order._id} style={{
+                background: T.card,
+                border: `1px solid ${isOpen ? T.gold : T.border}`,
+                borderRadius: 12, overflow: 'hidden',
+                boxShadow: '0 2px 8px rgba(0,0,0,.04)',
+                transition: 'border-color .2s',
+              }}>
 
-                {/* ── Order Row (header) ── */}
-                <div
-                  onClick={() => setExpanded(isOpen ? null : order._id)}
-                  style={{ padding: '15px 20px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', cursor: 'pointer' }}
-                >
-                  {/* ID */}
+                {/* Order row */}
+                <div onClick={() => setExpanded(isOpen ? null : order._id)}
+                  style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', cursor: 'pointer' }}
+                  onMouseEnter={e => { if (!isOpen) e.currentTarget.style.background = T.bg; }}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+
+                  {/* Order ID */}
                   <div style={{ minWidth: 100 }}>
-                    <div className="a-stat-label" style={{ marginBottom: 3 }}>Order ID</div>
-                    <div className="a-table-id">#{order._id.slice(-8).toUpperCase()}</div>
+                    <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 3 }}>Order ID</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 12, color: T.gold2, fontWeight: 700 }}>#{order._id.slice(-8).toUpperCase()}</div>
                   </div>
 
                   {/* Customer */}
                   <div style={{ flex: 1, minWidth: 130 }}>
-                    <div className="a-stat-label" style={{ marginBottom: 3 }}>Customer</div>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{order.user?.name || 'Guest'}</div>
-                    <div style={{ fontSize: 11, color: 'var(--muted)' }}>{order.user?.email}</div>
+                    <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 3 }}>Customer</div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: T.ink }}>{order.user?.name || 'Guest'}</div>
+                    <div style={{ fontSize: 11, color: T.muted }}>{order.user?.email}</div>
                   </div>
 
                   {/* Amount */}
                   <div style={{ minWidth: 90 }}>
-                    <div className="a-stat-label" style={{ marginBottom: 3 }}>Amount</div>
-                    <div className="a-table-amount">₹{order.total?.toLocaleString()}</div>
+                    <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 3 }}>Amount</div>
+                    <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, color: T.ink, letterSpacing: 1 }}>₹{order.total?.toLocaleString()}</div>
                   </div>
 
                   {/* Items */}
-                  <div style={{ minWidth: 60, textAlign: 'center' }}>
-                    <div className="a-stat-label" style={{ marginBottom: 3 }}>Items</div>
-                    <div style={{ fontSize: 13, color: 'var(--text2)' }}>{order.items?.length || 0}</div>
+                  <div style={{ minWidth: 50 }}>
+                    <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 3 }}>Items</div>
+                    <div style={{ fontSize: 13, color: T.ink2 }}>{order.items?.length || 0}</div>
                   </div>
 
                   {/* Payment */}
                   <div style={{ minWidth: 80 }}>
-                    <div className="a-stat-label" style={{ marginBottom: 3 }}>Payment</div>
-                    <div style={{ fontSize: 12, color: 'var(--text2)' }}>
-                      {PAYMENT_ICON[order.paymentMethod] || '💳'} {order.paymentMethod?.toUpperCase()}
-                    </div>
+                    <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 3 }}>Payment</div>
+                    <div style={{ fontSize: 12, color: T.ink2 }}>{PAY_ICON[order.paymentMethod] || '💳'} {order.paymentMethod?.toUpperCase()}</div>
                   </div>
 
                   {/* Date */}
                   <div style={{ minWidth: 70 }}>
-                    <div className="a-stat-label" style={{ marginBottom: 3 }}>Date</div>
-                    <div style={{ fontSize: 12, color: 'var(--text2)' }}>
-                      {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
-                    </div>
+                    <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 3 }}>Date</div>
+                    <div style={{ fontSize: 12, color: T.muted }}>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}</div>
                   </div>
 
                   {/* Status dropdown */}
                   <div onClick={e => e.stopPropagation()}>
-                    <select
-                      className="a-select"
-                      value={order.orderStatus}
-                      onChange={e => handleStatus(order._id, e.target.value)}
-                      disabled={isUpdating}
-                      style={{ color: cfg.color, background: cfg.bg, borderColor: cfg.border, fontWeight: 700, fontSize: 12, opacity: isUpdating ? .6 : 1 }}
-                    >
-                      {STATUSES.map(s => (
-                        <option key={s} value={s} style={{ background: 'var(--card)', color: 'var(--text)' }}>
-                          {STATUS_CONFIG[s].label}
-                        </option>
-                      ))}
+                    <select value={order.orderStatus} onChange={e => handleStatus(order._id, e.target.value)} disabled={isUpd}
+                      style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color, borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', outline: 'none', fontFamily: 'inherit', opacity: isUpd ? .6 : 1 }}>
+                      {STATUSES.map(s => <option key={s} value={s} style={{ background: T.card, color: T.ink }}>{STATUS_CFG[s].label}</option>)}
                     </select>
                   </div>
 
-                  {/* Expand chevron */}
-                  <div style={{ color: 'var(--muted)', fontSize: 12, marginLeft: 'auto', transition: 'transform .2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}>
-                    ▼
-                  </div>
+                  {/* Chevron */}
+                  <div style={{ color: T.muted, fontSize: 11, marginLeft: 'auto', transition: 'transform .2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}>▼</div>
                 </div>
 
-                {/* ── Expanded Panel ── */}
+                {/* Expanded details */}
                 {isOpen && (
-                  <div style={{ borderTop: '1px solid var(--a-border)', padding: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                  <div style={{ borderTop: `1px solid ${T.border}`, padding: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, background: T.bg }}>
 
-                    {/* Items list */}
+                    {/* Items */}
                     <div>
-                      <div className="a-stat-label" style={{ marginBottom: 12 }}>Items Ordered</div>
+                      <div style={{ fontSize: 10, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 12 }}>Items Ordered</div>
                       {order.items?.map((item, i) => (
-                        <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--a-border)' }}>
-                          <div style={{
-                            width: 44, height: 50, background: 'var(--card2)',
-                            borderRadius: 7, overflow: 'hidden', flexShrink: 0,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            border: '1px solid var(--a-border)', fontSize: 18,
-                          }}>
-                            {item.image
-                              ? <img src={item.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                              : '👖'
-                            }
+                        <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${T.border}` }}>
+                          <div style={{ width: 44, height: 50, background: T.sand, borderRadius: 7, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${T.border}`, fontSize: 18 }}>
+                            {item.image ? <img src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '👖'}
                           </div>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{item.name}</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>{item.name}</div>
                             <div style={{ marginTop: 4, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                              <span className="a-tag">Size: {item.size}</span>
-                              <span className="a-tag">Color: {item.color}</span>
-                              <span className="a-tag">Qty: {item.quantity}</span>
+                              {[`Size: ${item.size}`, `Color: ${item.color}`, `Qty: ${item.quantity}`].map(tag => (
+                                <span key={tag} style={{ background: T.beige, border: `1px solid ${T.border}`, color: T.ink2, padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600 }}>{tag}</span>
+                              ))}
                             </div>
                           </div>
-                          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--accent)' }}>
-                            ₹{(item.price * item.quantity).toLocaleString()}
-                          </div>
+                          <div style={{ fontWeight: 700, fontSize: 14, color: T.gold2 }}>₹{(item.price * item.quantity).toLocaleString()}</div>
                         </div>
                       ))}
-
-                      {/* Order total summary */}
-                      <div style={{ marginTop: 12, padding: '10px 0', display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: 13, color: 'var(--muted)' }}>Order Total</span>
-                        <span className="a-table-amount">₹{order.total?.toLocaleString()}</span>
+                      <div style={{ marginTop: 12, padding: '10px 0', display: 'flex', justifyContent: 'space-between', borderTop: `1px solid ${T.border}` }}>
+                        <span style={{ fontSize: 13, color: T.muted, fontWeight: 600 }}>Order Total</span>
+                        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, color: T.ink, letterSpacing: 1 }}>₹{order.total?.toLocaleString()}</span>
                       </div>
                     </div>
 
-                    {/* Right column */}
+                    {/* Right: address + status */}
                     <div>
-                      {/* Shipping address */}
-                      <div className="a-stat-label" style={{ marginBottom: 10 }}>Shipping Address</div>
-                      <div style={{ background: 'var(--card2)', borderRadius: 10, padding: '14px 16px', border: '1px solid var(--a-border)', marginBottom: 20, lineHeight: 1.8 }}>
-                        <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)', marginBottom: 4 }}>
-                          {order.shippingAddress?.fullName}
-                        </div>
-                        <div style={{ fontSize: 13, color: 'var(--text2)' }}>{order.shippingAddress?.address}</div>
-                        <div style={{ fontSize: 13, color: 'var(--text2)' }}>
-                          {order.shippingAddress?.city} — {order.shippingAddress?.pincode}
-                        </div>
-                        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
-                          📞 {order.shippingAddress?.phone}
-                        </div>
+                      <div style={{ fontSize: 10, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 10 }}>Shipping Address</div>
+                      <div style={{ background: T.card, borderRadius: 10, padding: '14px 16px', border: `1px solid ${T.border}`, marginBottom: 20, lineHeight: 1.9 }}>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: T.ink }}>{order.shippingAddress?.fullName}</div>
+                        <div style={{ fontSize: 13, color: T.ink2 }}>{order.shippingAddress?.address}</div>
+                        <div style={{ fontSize: 13, color: T.ink2 }}>{order.shippingAddress?.city} — {order.shippingAddress?.pincode}</div>
+                        <div style={{ fontSize: 13, color: T.muted, marginTop: 2 }}>📞 {order.shippingAddress?.phone}</div>
                       </div>
 
-                      {/* Quick status buttons */}
-                      <div className="a-stat-label" style={{ marginBottom: 10 }}>Update Status</div>
+                      <div style={{ fontSize: 10, color: T.muted, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 700, marginBottom: 10 }}>Update Status</div>
                       <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
                         {STATUSES.map(s => {
-                          const scfg     = STATUS_CONFIG[s];
+                          const sc = STATUS_CFG[s];
                           const isActive = order.orderStatus === s;
                           return (
-                            <button
-                              key={s}
-                              disabled={isUpdating || isActive}
-                              onClick={() => handleStatus(order._id, s)}
-                              className="a-btn a-btn-sm"
-                              style={{
-                                background:   isActive ? scfg.bg  : 'transparent',
-                                color:        isActive ? scfg.color : 'var(--muted)',
-                                borderColor:  isActive ? scfg.border : 'var(--a-border)',
-                                border:       '1px solid',
-                                opacity:      isUpdating ? .6 : 1,
-                                cursor:       isActive ? 'default' : 'pointer',
-                                fontWeight:   isActive ? 700 : 500,
-                              }}
-                            >
-                              {scfg.label}
+                            <button key={s} disabled={isUpd || isActive} onClick={() => handleStatus(order._id, s)}
+                              style={{ padding: '6px 14px', borderRadius: 20, fontSize: 11, fontWeight: isActive ? 700 : 500, fontFamily: 'inherit', cursor: isActive ? 'default' : 'pointer', border: `1px solid ${isActive ? sc.border : T.border}`, background: isActive ? sc.bg : T.card, color: isActive ? sc.color : T.muted, opacity: isUpd ? .6 : 1, transition: 'all .15s' }}>
+                              {sc.label}
                             </button>
                           );
                         })}
@@ -318,25 +305,6 @@ export default function AdminOrders() {
         </div>
       )}
     </div>
-  );
-}
-
-/* ── Filter Tab ── */
-function FilterTab({ label, count, active, color, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: '7px 16px', borderRadius: 20, cursor: 'pointer',
-        fontSize: 12, fontWeight: 600,
-        border:      `1px solid ${active ? color : 'var(--a-border)'}`,
-        background:  active ? `${color}18` : 'transparent',
-        color:       active ? color : 'var(--muted)',
-        transition:  'all .15s',
-      }}
-    >
-      {label} <span style={{ opacity: .7 }}>({count})</span>
-    </button>
   );
 }
 
