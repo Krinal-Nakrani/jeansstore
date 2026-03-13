@@ -15,7 +15,7 @@ const T = {
   card:    '#ffffff',
   border:  '#e0d8ce',
   sand:    '#e2d9cc',
-  ink:     '#1c1c1c',
+  ink:     '#ff0000',
   ink2:    '#4a4a4a',
   muted:   '#9a9080',
   gold:    '#b89b6a',
