@@ -138,7 +138,7 @@ export default function Navbar() {
             fontSize: 26, letterSpacing: 4,
             color: '#c8a96e', textDecoration: 'none',
           }}>
-            DENIM<span style={{ color: '#fff' }}>CO</span>
+            INDUS<span style={{ color: '#fff' }}>.</span>
           </Link>
 
           {/* ── DESKTOP: Nav links ── */}
