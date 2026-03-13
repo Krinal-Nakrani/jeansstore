@@ -42,6 +42,7 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [slide, setSlide] = useState(0);
+  const [animKey, setAnimKey] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,9 +53,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setSlide(s => (s + 1) % bannerSlides.length), 4000);
+    const t = setInterval(() => {
+      setSlide(s => (s + 1) % bannerSlides.length);
+      setAnimKey(k => k + 1);
+    }, 4500);
     return () => clearInterval(t);
   }, []);
+
+  const changeSlide = (i) => {
+    setSlide(i);
+    setAnimKey(k => k + 1);
+  };
 
   const current = bannerSlides[slide];
 
@@ -91,16 +100,20 @@ export default function Home() {
           width: '100%', display: 'flex', alignItems: 'center',
           justifyContent: 'space-between', gap: '40px',
         }}>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1 }} key={animKey}>
+            {/* Tag badge — slides down */}
             <div style={{
               display: 'inline-block',
               background: current.accent === '#ffffff' ? 'rgba(255,255,255,0.15)' : '#1a1a1a',
-              color: current.accent === '#ffffff' ? '#fff' : '#fff',
+              color: '#fff',
               padding: '4px 14px', fontSize: '11px', letterSpacing: '3px',
               fontWeight: 600, marginBottom: '20px', borderRadius: '2px',
+              animation: 'slideDown 0.5s cubic-bezier(0.22,1,0.36,1) both',
             }}>
               {current.tag}
             </div>
+
+            {/* Heading — each word slides up with stagger */}
             <h1 style={{
               fontFamily: "'Bebas Neue', sans-serif",
               fontSize: 'clamp(48px, 8vw, 88px)',
@@ -108,17 +121,35 @@ export default function Home() {
               color: current.accent,
               whiteSpace: 'pre-line',
               letterSpacing: '2px',
-            }}>{current.heading}</h1>
+              overflow: 'hidden',
+            }}>
+              {current.heading.split('\n').map((line, li) => (
+                <div key={li} style={{ overflow: 'hidden' }}>
+                  <span style={{
+                    display: 'block',
+                    animation: `slideUp 0.6s cubic-bezier(0.22,1,0.36,1) ${0.1 + li * 0.12}s both`,
+                  }}>{line}</span>
+                </div>
+              ))}
+            </h1>
+
+            {/* Subtitle — fades in */}
             <p style={{
-              fontSize: '15px', color: current.accent === '#ffffff' ? 'rgba(255,255,255,0.7)' : '#666',
+              fontSize: '15px',
+              color: current.accent === '#ffffff' ? 'rgba(255,255,255,0.7)' : '#666',
               marginBottom: '32px', maxWidth: '400px', lineHeight: 1.6,
+              animation: 'fadeInUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.35s both',
             }}>{current.sub}</p>
+
+            {/* Buttons — slide in from left with stagger */}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Link to="/shop" style={{
-                background: current.accent, color: current.accent === '#ffffff' ? '#1a1a1a' : '#fff',
+                background: current.accent,
+                color: current.accent === '#ffffff' ? '#1a1a1a' : '#fff',
                 padding: '14px 32px', textDecoration: 'none', fontSize: '13px',
                 fontWeight: 600, letterSpacing: '1.5px', borderRadius: '2px',
-                transition: 'opacity 0.2s',
+                animation: 'fadeInLeft 0.6s cubic-bezier(0.22,1,0.36,1) 0.45s both',
+                display: 'inline-block',
               }}>{current.cta}</Link>
               <Link to="/shop" style={{
                 background: 'transparent',
@@ -126,6 +157,8 @@ export default function Home() {
                 padding: '14px 32px', textDecoration: 'none', fontSize: '13px',
                 fontWeight: 600, letterSpacing: '1.5px', borderRadius: '2px',
                 border: `1.5px solid ${current.accent}`,
+                animation: 'fadeInLeft 0.6s cubic-bezier(0.22,1,0.36,1) 0.55s both',
+                display: 'inline-block',
               }}>View Collection</Link>
             </div>
           </div>
@@ -144,7 +177,7 @@ export default function Home() {
         {/* Slide indicators */}
         <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px' }}>
           {bannerSlides.map((_, i) => (
-            <button key={i} onClick={() => setSlide(i)} style={{
+            <button key={i} onClick={() => changeSlide(i)} style={{
               width: i === slide ? '24px' : '8px', height: '8px',
               borderRadius: '4px', border: 'none', cursor: 'pointer',
               background: i === slide ? current.accent : 'rgba(0,0,0,0.2)',
@@ -283,6 +316,22 @@ export default function Home() {
         @keyframes pulse {
           0%, 100% { opacity: 1 }
           50% { opacity: 0.5 }
+        }
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(60px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInLeft {
+          from { opacity: 0; transform: translateX(-24px); }
+          to   { opacity: 1; transform: translateX(0); }
         }
       `}</style>
     </div>
