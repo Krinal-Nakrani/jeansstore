@@ -106,8 +106,11 @@ export default function AdminDashboard() {
     byDate[d].orders++;
     byDate[d].revenue += o.total || 0;
   });
-  const chartData = Object.values(byDate).slice(-7);
-
+  // const chartData = Object.values(byDate).slice(-7);
+  const chartData = Object.values(byDate)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(-7);
+    
   const statusCount = {};
   orders.forEach(o => { statusCount[o.orderStatus] = (statusCount[o.orderStatus] || 0) + 1; });
 
