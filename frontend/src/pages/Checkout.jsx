@@ -6,7 +6,7 @@ import { placeOrder } from '../services/api';
 
 const PAYMENTS = [
   { id: 'COD',    icon: '💵', label: 'Cash on Delivery',  sub: 'Pay when your order arrives at your door' },
-  { id: 'Stripe', icon: '💳', label: 'Pay Online',         sub: 'Credit / Debit card via Stripe' },
+  { id: 'Stripe', icon: '💳', label: 'Pay Online',         sub: 'Credit / Debit card via Stripe or UPI' },
 ];
 
 export default function Checkout() {
