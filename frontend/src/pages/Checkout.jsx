@@ -100,7 +100,7 @@ export default function Checkout() {
             color: '#1c1c1c', margin: '0 0 12px',
           }}>Order Confirmed!</h2>
           <p style={{ color: '#9a9080', fontSize: 15, marginBottom: 8 }}>
-            Thank you for shopping with DENIMCO.
+            Thank you for shopping with INDUS.
           </p>
           <p style={{ color: '#b89b6a', fontSize: 13, letterSpacing: 1 }}>
             Redirecting to your orders…
