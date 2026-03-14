@@ -36,7 +36,18 @@ export default function ProductCard({ product }) {
       {/* Image */}
       <div style={{ position: 'relative', height: 280, background: '#1a1a1a', overflow: 'hidden' }}>
         {image ? (
-          <img src={image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s' , transform: hovered ? 'scale(1.05)' : 'scale(1)' }} />
+          <img
+            src={product.images[0]}
+            alt={product.name}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'top',   // ← focus on top (face/product) not center
+              imageRendering: 'auto',
+            }}
+          />
+          // <img src={image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s' , transform: hovered ? 'scale(1.05)' : 'scale(1)' }} />
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8 }}>
             <span style={{ fontSize: 48 }}>👖</span>
